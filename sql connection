@@ -1,0 +1,61 @@
+using System;
+using System.Collections.Generic;
+using System.Data.SqlClient;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ADONETIntro
+{
+    public class TrainerDB
+    {
+        //1.select All Trainers
+        public List<Trainer> AllTrainers()
+        {
+
+            List<Trainer> trainers = new List<Trainer>();
+
+            string connectionstring = "server=.\\sqlexpress; database=MYADONETDB ; integrated security=true;";
+
+            //SqlConnection con = new SqlConnection();
+            //con.ConnectionString = connectionstring;
+
+            SqlConnection con = new SqlConnection(connectionstring);
+            //con.Open();
+
+            string cyber = "select Id, Name, City,Experience from Trainer";
+            SqlCommand Tech = new SqlCommand(cyber, con);
+
+            con.Open();
+
+            SqlDataReader reader = Tech.ExecuteReader();
+
+            if(reader.HasRows)
+            {
+                while(reader.Read())
+                {
+                    Trainer t = new Trainer();
+                    t.Id = (int)reader["Id"];
+                    t.Name = reader["Name"].ToString();
+                    t.City = reader["City"].ToString();
+                    t.Experience = (int)reader["Experience"];
+                    trainers.Add(t);
+                }
+            }
+            con.Close();
+
+            return trainers;
+        }
+        
+
+        //2.Select A Trainer By Id
+
+        //3.Create a new Trainer
+
+        //4.Update Exesting Trainer By Id
+
+        //5.Delete  a Existing Trainer By Id
+
+
+    }
+}
