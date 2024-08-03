@@ -1,65 +1,334 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using ADONETIntro;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.SqlClient;
 using System.Linq;
+using System.Runtime.ConstrainedExecution;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
+using System.Configuration;
+using System.Linq.Expressions;
 
-namespace ADONetCoreAppp
+namespace ADONETIntro
 {
-    // ye dot net core Application ka code hai isme srif ek hi change hai encrypted=false;
     public class TrainerDB
     {
-        public List<Trainer> AllTrainers()//Trainer table ka pura data copy kiye hai.
+
+        string connextionString = null;     //this is class field it have private access Specifier 
+
+        public TrainerDB()                // here created constructor for connextionString //class name and constructor name is same
         {
-            List<Trainer> trainers = new List<Trainer>();//Trainer ki List Banaye
 
-            string connectionString = "server=.\\sqlexpress;database=MYADONETDB;integrated security=true;encrypt=false;";
-            //so here we have to do some changes in .net core encrypt=false;
+            connextionString =
+             ConfigurationManager.ConnectionStrings["MYADONETDB"].ConnectionString;
 
-            SqlConnection con = new SqlConnection(connectionString);
+        }
 
-            SqlCommand cmd = new SqlCommand("select * from Trainer", con); //select * from Trainer ye ek  inline(adoc)query hai
-            con.Open();
-            SqlDataReader reader = cmd.ExecuteReader();
+        //1.select All Trainers
+        public void AllTrainers(out List<Trainer> trainers, out List<Student> students)
+        {
+            #region  selecting records from one table
 
-            if (reader.HasRows) // HasRows check krta hai Rows hai kya
+
+            //List<Trainer> trainers = new List<Trainer>();
+
+            //string connectionstring = "server=.\\sqlexpress; database=MYADONETDB ; integrated security=true;";
+
+            ////SqlConnection con = new SqlConnection();
+            ////con.ConnectionString = connectionstring;
+
+            //SqlConnection con = new SqlConnection(connectionstring);
+
+
+            //string cyber = "select Id, Name, City,Experience from Trainer";
+
+            //SqlCommand Tech = new SqlCommand(cyber, con); //Prepared Command
+
+            //con.Open();
+
+            //SqlDataReader reader = Tech.ExecuteReader();
+
+            //if (reader.HasRows)//reader me rows hongi to true 
+            //{                       //agar true to if ke under
+            //    while (reader.Read())//ek ek query/record add kar
+            //    {
+            //        Trainer t = new Trainer();
+            //        t.Id = (int)reader["Id"];
+            //        t.Name = reader["Name"].ToString();
+            //        t.City = reader["City"].ToString();
+            //        t.Experience = (int)reader["Experience"];
+            //        trainers.Add(t);
+            //    }
+            //    con.Close();
+
+            //    return trainers;
+            //}
+
+            #endregion selecting records from one table
+
+
+            #region  selecting records from two table
+
+            //            trainers = new List<Trainer>();
+            //            students = new List<Student>();
+
+
+            //            string iamConnecting =
+            //                 "server= .\\sqlexpress; database= MYADONETDB;integrated security=true;";
+
+            //            SqlConnection con = new SqlConnection(iamConnecting);
+
+            //            string cyber = "select Id,Name,City,Experience from Trainer;select RollNumber,Name,Gender,TrainerId from Student";
+
+            //            SqlCommand Tech = new SqlCommand(cyber, con);
+
+            //            con.Open();
+
+            //            SqlDataReader reader = Tech.ExecuteReader();
+
+            //            while (reader.Read())
+            //            {
+
+            //                Trainer t = new Trainer()
+            //                {
+            //                    Id = (int)reader["Id"],
+            //                    Name = reader["Name"].ToString(),
+            //                    City = reader["City"].ToString(),
+            //                    Experience = (int)reader["Experience"]
+            //                };
+            //                trainers.Add(t);
+            //            }
+            //            reader.NextResult();//It will point to next resultset
+
+            //            while (reader.Read())
+            //            {
+            //                Student s = new Student() //here object created Student oopper same <Student> name ka variable create kiya hai object create karte wakt capital s use kiya hai 
+            //                {
+            //                    RollNumber = (int)reader["Rollnumber"],
+            //                    Name = reader["Name"].ToString(),
+            //                    Gender = reader["Gender"].ToString(),
+            //                    TrainerId = (int)reader["TrainerId"]
+            //                };
+
+            //                students.Add(s);
+
+            //            }
+            //            con.Close();
+
+            //        }
+
+            //    }
+            // }
+            #endregion  selecting records from two table
+
+            #region  selecting records from two table using sql data Adapter
+
+            trainers = new List<Trainer>();
+            students = new List<Student>();
+
+            string ThisIsConnectingToServer = "server=.\\sqlexpress;database=MYADONETDB; integrated security=true;";
+
+            SqlConnection con = new SqlConnection(ThisIsConnectingToServer);
+
+            string AssignQueryHere = "select Id,Name,City,Experience from Trainer;select RollNumber,Name,Gender,TrainerId from Student";
+
+            SqlDataAdapter adapter = new SqlDataAdapter(AssignQueryHere, con);//replace SQL SqlCommand to sqlDataAdapter
+
+            DataSet ds = new DataSet();
+
+            adapter.Fill(ds); //opening and closing both work done by Fill() method
+
+            if (ds != null && ds.Tables.Count > 0)
             {
-                while (reader.Read())
+                if (ds.Tables[0] != null && ds.Tables[0].Rows.Count > 0)
                 {
-                    Trainer t = new Trainer() //object Initializer syntax
+                    for (int i = 0; i < ds.Tables[0].Rows.Count; i++)
                     {
-                        Id = (int)reader["Id"],
-                        Name = reader["Name"].ToString(),
-                        City = reader["City"].ToString(),
-                        Experience = (int)reader["Experience"]
-                    };
-                    trainers.Add(t);//Trainer List yaha Pr Add Kiye
+                        var row = ds.Tables[0].Rows[i];
+                        Trainer t = new Trainer()
+                        {
+                            Id = (int)row["Id"],
+                            Name = row["Name"].ToString(),
+                            City = row["City"].ToString(),
+                            Experience = (int)row["Experience"]
+
+                        };
+                        trainers.Add(t);
+                    }
                 }
+
+
+                if (ds.Tables[1] != null && ds.Tables[1].Rows.Count > 0)
+                {
+                    for (int i = 0; i < ds.Tables[1].Rows.Count; i++)
+                    {
+                        var row = ds.Tables[1].Rows[i];
+
+                        Student s = new Student()
+                        {
+                            RollNumber = (int)row["RollNumber"],
+                            Name = row["Name"].ToString(),
+                            Gender = row["Gender"].ToString(),
+                            TrainerId = (int)row["TrainerId"]
+
+                        };
+                        students.Add(s);
+                    }
+                }
+
             }
-            else
+
+
+
+
+            #endregion  selecting records from two table using sql data Adapter
+
+            //2.Select A Trainer By Id
+            #region Select A Trainer By Id
+
+
+            //public Trainer GetTrainerById(int id)
+            //{
+            //    Trainer trainer = new Trainer();
+
+            //    string ThisIsConnectingToServer = "server=.\\sqlexpress;database=MYADONETDB;integrated security=true;";
+
+            //    SqlConnection con = new SqlConnection(ThisIsConnectingToServer);//step 1.Connecting SQL Server Database
+
+            //    string AssignQueryHere = $"select Id,Name,City,Experience from Trainer where Id={id}";
+
+            //    SqlCommand cmd = new SqlCommand(AssignQueryHere, con); //step 2. Prepare command
+
+            //    con.Open();
+            //    SqlDataReader reader = cmd.ExecuteReader(); // step 3. Execute command
+
+            //    while (reader.Read())
+            //    {
+            //        trainer.Id = (int)reader["Id"];
+            //        trainer.Name = reader["Name"].ToString();
+            //        trainer.City = reader["City"].ToString();
+            //        trainer.Experience = (int)reader["Experience"];
+
+            //        break;
+
+            //    }
+            //    con.Close();
+
+            //    return trainer;
+            //}
+
+
+            #endregion Select A Trainer By Id
+
+            //3.Create a new Trainer
+            #region Create a new Trainer
+
+            //public bool CreateTrainer(Trainer trainer, out int newRollNumber)   ////yaha pr newRollNumber ko jese int datatype diya hai wese trainer ko Trainer datatype diya hai
+            //{
+            //    string connectionString =
+            //    "server=.\\sqlexpress;database=B22ADONETDB;integrated security=true;";
+
+            //    SqlConnection con = new SqlConnection(connectionString);
+
+            //    SqlCommand cmd = new SqlCommand("uspCreateTrainer", con);
+            //    cmd.CommandType = CommandType.StoredProcedure;
+
+            //    cmd.Parameters.AddWithValue("@Name", trainer.Name);//// sql me humne jo stoared procedure banaya hai usme humne @name,@city,@experience yese name diye hai.
+            //    cmd.Parameters.AddWithValue("@City", trainer.City);////properties banate wakt @ use nahi kiya hai.
+            //    cmd.Parameters.AddWithValue("@Experience", trainer.Experience);
+
+            //    SqlParameter rollNumber = new SqlParameter()
+            //    {
+            //        ParameterName = "@RollNumber", prarametrName SqlDbType Direction in me values assign ki hai ye sab inbuilt parameters hai 
+            //        SqlDbType = SqlDbType.Int,
+            //        Direction = ParameterDirection.Output,
+            //    };
+            //    cmd.Parameters.Add(rollNumber);
+
+            //    SqlParameter status = new SqlParameter()
+            //    {
+            //        ParameterName = "@Status",
+            //        SqlDbType = SqlDbType.Bit,
+            //        Direction = ParameterDirection.Output,
+            //    };
+
+            //    cmd.Parameters.Add(status);
+
+            //    con.Open();
+
+            //    cmd.ExecuteNonQuery();
+
+            //    newRollNumber = (int)rollNumber.Value;
+
+            //    con.Close();
+
+            //    return (bool)status.Value;
+        }
+
+
+        #endregion Create a new Trainer
+
+
+        #region Updating trainer
+        //   4.Update Exesting Trainer By Id
+        public bool UpdateTrainer(Trainer t) //// hum ne yaha pr method create ki return type bool diya name UpdateTrainer diya t variable ko Trainer datatype diya 
+            
+        {
+            //string connextionString =
+            //  "server=.\\sqlexpress;database=MYADONETDB;integrated security=true;";
+            //string connextionString = "";
+
+            string connectionstring = "server=.\\sqlexpress; database=MYADONETDB; integrated security=true;";
+
+            SqlConnection con = new SqlConnection(connectionstring);
+
+            SqlCommand cmd = new SqlCommand(DBConstants.spUpdateTrainer, con);
+            cmd.CommandType = CommandType.StoredProcedure; //// yaha pr SqlCommand ka object use karke storedProcedure call ki hai aur commandType humne variable  liya hai inbult nahi hai 
+
+            cmd.Parameters.AddWithValue("@Id", t.Id);
+            cmd.Parameters.AddWithValue("@Name", t.Name);
+            cmd.Parameters.AddWithValue("@City", t.City);
+            cmd.Parameters.AddWithValue("@Experience", t.Experience);
+
+            SqlParameter status = new SqlParameter()
             {
-                trainers = null;
-            }
+                ParameterName = "@Status",
+                SqlDbType = SqlDbType.Bit,
+                Direction = ParameterDirection.Output,
+            };
+
+            cmd.Parameters.Add(status);
+
+            con.Open();
+
+            cmd.ExecuteNonQuery();
+
             con.Close();
 
-            return trainers;
+            return (bool)status.Value;
         }
+        #endregion Updating trainer
+
+
+        //5.Delete a Existing Trainer By Id
+        #region Deleting a trainer
 
         public bool DeleteTrainer(int id)
         {
-            string connextionString =
-                    "server=.\\sqlexpress;database=MYADONETDB;integrated security=true;encrypt=false;";
+            //  string connextionString =
+            //         "server=.\\sqlexpress;database=MYADONETDB;integrated security=true;";
 
             //string connextionString =
             //  ConfigurationManager.ConnectionStrings["ADONETDB"].ConnectionString;
 
-            // [] bracket in connectionstring name which is written in App.config file.
+
+            //in [] bracket connectionstring name which is written in App.config file.
 
             SqlConnection con = new SqlConnection(connextionString);
 
-            SqlCommand cmd = new SqlCommand("uspDeleteTrainer", con);
+            SqlCommand cmd = new SqlCommand(DBConstants.spDeleteTrainer, con);
 
             cmd.CommandType = CommandType.StoredProcedure;
 
@@ -77,54 +346,71 @@ namespace ADONetCoreAppp
 
             con.Open();
 
-            cmd.ExecuteNonQuery();//ExecuteNonQuery command class hai, use for prepared & execute command
+            cmd.ExecuteNonQuery();//ExecuteNonQuery command class hai use to prepared & execute command
 
             con.Close();
 
             return (bool)status.Value;
         }
 
-        public bool CreateTrainer(Trainer trainer, out int rollNumber)
+
+        #endregion Deleting a trainer
+
+        //6.record copy from one database to another database
+
+
+        #region record copy from one database to another database
+
+
+        public bool BulkDataCopy()
         {
-            string connectionString =
-                "server=.\\sqlexpress;database=MYADONETDB;integrated security=true;encrypt=false;";
 
-            SqlConnection con = new SqlConnection(connectionString);
-
-            SqlCommand cmd = new SqlCommand("uspCreateTrainer", con);
-            cmd.CommandType = CommandType.StoredProcedure;
-
-            cmd.Parameters.AddWithValue("@Name", trainer.Name);
-            cmd.Parameters.AddWithValue("@City", trainer.City);
-            cmd.Parameters.AddWithValue("@Experience", trainer.Experience);
-
-            SqlParameter rn = new SqlParameter()
             {
-                ParameterName = "@RollNumber",
-                SqlDbType = SqlDbType.Int,
-                Direction = ParameterDirection.Output
-            };
-            cmd.Parameters.Add(rn);
+                try
+                {
+                    SqlConnection con = new SqlConnection(connextionString); // 1st database connectionString call here
+                    //SqlCommand cmd = new SqlCommand("select * from trainer", con); //prepred Command
+                    //con.Open();
+                    //SqlDataReader reader = cmd.ExecuteReader(); //ExecuteReader se data read kiye 1st database me ka
 
-            SqlParameter status = new SqlParameter()
-            {
-                ParameterName = "@Status",
-                SqlDbType = SqlDbType.Bit,
-                Direction = ParameterDirection.Output
-            };
-            cmd.Parameters.Add(status);
+                    SqlDataAdapter adapter = new SqlDataAdapter("select * from trainer", con);
+                    DataSet ds = new DataSet();
+                    adapter.Fill(ds);
 
-            con.Open();
 
-            cmd.ExecuteNonQuery();
+                    string destinationConString =
+                        ConfigurationManager.ConnectionStrings["MYArchiveDB"].ConnectionString;//2nd database connectionstring written here by  ConfigurationManager class
 
-            rollNumber = (int)rn.Value;
-            con.Close();
-            return (bool)status.Value;
-           
+                    SqlConnection destinationCon = new SqlConnection(destinationConString);
+
+                    SqlBulkCopy copy = new SqlBulkCopy(destinationCon);//sqlBulkCopy object created
+                    copy.DestinationTableName = "dbo.Trainer";
+
+                    destinationCon.Open();
+
+                    //copy.WriteToServer(reader); //copy all records from reader object to destination table
+                    copy.WriteToServer(ds.Tables[0]);
+                    //con.Close();
+
+                    destinationCon.Close();
+
+                    return true;
+                }
+                catch
+                {
+                    return false;
+
+
+                }
+                
+            }
         }
-
-       
+        #endregion record copy from one database to another database
 
     }
 }
+          
+        
+
+
+
