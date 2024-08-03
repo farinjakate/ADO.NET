@@ -4,12 +4,13 @@ using System.Linq;
 using System.Web;
 using System.Web.Security;
 using System.Web.SessionState;
-
-namespace ADO.NETWebApp
+    
+namespace ADONetWebApplication
 {
+    //application Level events
     public class Global : System.Web.HttpApplication
     {
-        //Application Level Events
+
         protected void Application_Start(object sender, EventArgs e)
         {
 

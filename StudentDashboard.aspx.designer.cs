@@ -11,25 +11,25 @@ namespace ADONetWebApplication
 {
 
 
-    public partial class MyLayout
+    public partial class StudentDashboard
     {
 
         /// <summary>
-        /// Header control.
+        /// LinkCreateStudent control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::ADONetWebApplication.UserControls.Header Header;
+        protected global::System.Web.UI.WebControls.HyperLink LinkCreateStudent;
 
         /// <summary>
-        /// MainContentHolder control.
+        /// gvStudents control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.ContentPlaceHolder MainContentHolder;
+        protected global::System.Web.UI.WebControls.GridView gvStudents;
     }
 }
